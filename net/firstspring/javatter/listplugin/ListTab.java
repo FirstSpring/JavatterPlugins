@@ -109,7 +109,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener {
 
 	private JPanel createObject(Status status){
 		TweetObjectFactory factory = new TweetObjectFactory(status,builders);
-		return factory.createTweetObject(observer);
+		return (JPanel) factory.createTweetObject(this.observer).getComponent();
 	}
 
 	private synchronized void addObject(JPanel jpanel){
