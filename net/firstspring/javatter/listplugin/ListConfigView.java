@@ -145,7 +145,7 @@ public class ListConfigView implements IJavatterTab, ActionListener
 			{
 				Twitter t = TwitterManager.getInstance().getTwitter();
 				String listName = listsView.getSelectedValue();
-				ListTab tab = ListPlugin.instance.createTab(listName);
+				ListTab tab = ListPlugin.instance.createTab();
 				int listId = lists.get(listsView.getSelectedIndex()).getId();
 				List<Status> l = new ArrayList();
 				int amount = (Integer)getAmount.getSelectedItem();
@@ -161,6 +161,8 @@ public class ListConfigView implements IJavatterTab, ActionListener
 				}
 				tab.lastStat = l.get(0);
 				tab.listId = listId;
+				tab.listName = listName;
+				tab.setNumber(tab.queue.size());
 				int time = (Integer)refreshInterval.getValue();
 				tab.refresher.schedule(tab.refreshTask, time * 1000, time * 1000);
 			}

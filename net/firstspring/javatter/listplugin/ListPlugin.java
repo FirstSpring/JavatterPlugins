@@ -41,10 +41,9 @@ public class ListPlugin extends JavatterPlugin{
 		menu.add(item);
 	}
 	
-	public ListTab createTab(String name)
+	public ListTab createTab()
 	{
 		ListTab tab = new ListTab(this.getMainView(), JavatterPluginLoader.getTweetObjectBuilder());
-		tab.listName = name;
 		this.addUserStreamTab("リスト", tab);
 		if(listTab == null)
 		{

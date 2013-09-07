@@ -42,7 +42,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener {
 	public static final Timer refresher = new Timer();
 	public RefreshTask refreshTask = new RefreshTask();
 	public int listId;
-	public String listName;
+	public String listName = "Loading";
 	public Status lastStat;
 	
 	public ListTab(UserEventViewObserver observer, List<TweetObjectBuilder> builders){
