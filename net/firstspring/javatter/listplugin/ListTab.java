@@ -32,7 +32,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener {
 	List<TweetObjectBuilder> builders;
 	
 	JPanel panel;
-	JScrollPane tp;
+	ListTabScrollPane tp;
 
 	volatile Queue<JPanel> queue=new ConcurrentLinkedQueue<JPanel>();
 	boolean queueFlag;
@@ -51,7 +51,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener {
 		panel = new JPanel();
 		panel.setBackground(BackGroundColor.color);
 		panel.setLayout(new BoxLayout(panel, 3));
-		tp = new JScrollPane(22, 31);
+		tp = new ListTabScrollPane(this);
 		tp.setViewportView(this.panel);
 		tp.getVerticalScrollBar().setUnitIncrement(20);
 		tp.getVerticalScrollBar().addAdjustmentListener(this);
