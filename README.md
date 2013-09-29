@@ -1,6 +1,8 @@
 JavatterPlugin
 ==============
 
-Javatter�p�ɍ�����v���O�C���̃\�[�X�u����ł�
-��{�I��WTFPL(Wikipedia�Ƃ�����)�Ȃ̂ōD���ɂ��Ă�������
-�������������K���Ȃ̂ł��܂�Q�l�ɂ��Ȃ����������Ǝv���܂�
+Javatter用に作ったプラグインのソース置き場です
+基本的にWTFPL(Wikipediaとか見て)なので好きにしてください
+ただし処理が適当なのであまり参考にしない方がいいと思います
+
+Scalaで作ってる物はScalaのライブラリを使用しないようにしてるので適当にビルドすれば動くはずです
