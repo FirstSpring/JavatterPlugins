@@ -16,7 +16,6 @@ class MoreTimelineView extends ActionListener with Runnable
   val button = new JButton
   val paging = new Paging(1, 200)
   var t = new Thread(this)
-  var first = true
   
   def get: Component = 
   {
