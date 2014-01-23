@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,6 +83,29 @@ public class ListConfigView implements IJavatterTab, ActionListener
 		refreshInterval = new JSpinner(new SpinnerNumberModel(10, 10, Integer.MAX_VALUE, 1));
 		refreshInterval.setSize(50, refreshInterval.getPreferredSize().height);
 		refreshInterval.setLocation(110, 55);
+		refreshInterval.addMouseWheelListener(new MouseWheelListener()
+		{
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				JSpinner s = (JSpinner) e.getComponent();
+				if (e.getWheelRotation() < 0)
+				{
+					Object o = s.getNextValue();
+					if (o != null)
+					{
+						s.setValue(o);
+					}
+				}
+				else
+				{
+					Object o = s.getPreviousValue();
+					if (o != null)
+					{
+						s.setValue(o);
+					}
+				}
+			}
+		});
 		panel.add(refreshInterval);
 
 		label = new JLabel("初期取得量");
