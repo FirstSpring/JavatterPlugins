@@ -88,21 +88,18 @@ public class ListConfigView implements IJavatterTab, ActionListener
 			public void mouseWheelMoved(MouseWheelEvent e)
 			{
 				JSpinner s = (JSpinner) e.getComponent();
+				Object value;
 				if (e.getWheelRotation() < 0)
 				{
-					Object o = s.getNextValue();
-					if (o != null)
-					{
-						s.setValue(o);
-					}
+					value = s.getNextValue();
 				}
 				else
 				{
-					Object o = s.getPreviousValue();
-					if (o != null)
-					{
-						s.setValue(o);
-					}
+					value = s.getPreviousValue();
+				}
+				if (value != null)
+				{
+					s.setValue(value);
 				}
 			}
 		});
