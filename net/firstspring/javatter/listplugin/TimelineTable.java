@@ -61,17 +61,17 @@ public class TimelineTable extends JTable
 		{
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean select, boolean focus, int row, int column)
 			{
-				JPanel p = (JPanel) value;
-				p.setMinimumSize(null);
-				p.setPreferredSize(null);
-				p.setMaximumSize(null);
-				int height = p.getPreferredSize().height;
+				Component c = (Component) value;
+				c.setMinimumSize(null);
+				c.setPreferredSize(null);
+				c.setMaximumSize(null);
+				int height = c.getPreferredSize().height;
 				// 呼び出しがループするのを防ぐ
 				if (table.getRowHeight(row) != height)
 				{
-					table.setRowHeight(row, p.getPreferredSize().height);
+					table.setRowHeight(row, c.getPreferredSize().height);
 				}
-				return p;
+				return c;
 			}
 		});
 	}
