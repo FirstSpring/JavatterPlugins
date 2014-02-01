@@ -36,7 +36,7 @@ public class ListConfigView implements IJavatterTab, ActionListener
 	JButton getButton;
 	JButton selectButton;
 	JSpinner refreshInterval;
-	JComboBox getAmount;
+	JComboBox amount;
 	JComboBox getCount;
 	static JList<String> listsView = new JList();
 	static List<UserList> lists;
@@ -110,10 +110,10 @@ public class ListConfigView implements IJavatterTab, ActionListener
 		label.setLocation(5, 89);
 		panel.add(label);
 
-		getAmount = new JComboBox<Integer>(new Integer[] { 20, 50, 100, 200 });
-		getAmount.setSize(50, getAmount.getPreferredSize().height);
-		getAmount.setLocation(110, 85);
-		panel.add(getAmount);
+		amount = new JComboBox<Integer>(new Integer[] { 20, 50, 100, 200 });
+		amount.setSize(50, amount.getPreferredSize().height);
+		amount.setLocation(110, 85);
+		panel.add(amount);
 
 		label = new JLabel("×");
 		label.setSize(label.getPreferredSize());
@@ -169,19 +169,16 @@ public class ListConfigView implements IJavatterTab, ActionListener
 				String listName = listsView.getSelectedValue();
 				ListTab tab = ListPlugin.instance.createTab();
 				int listId = lists.get(listsView.getSelectedIndex()).getId();
-				List<Status> l = new ArrayList<Status>();
-				int amount = (Integer) getAmount.getSelectedItem();
-				int count = (Integer) getCount.getSelectedItem();
-				for (int i = 1; i <= count; i++)
-				{
-					l.addAll(t.getUserListStatuses(listId, new Paging(i, amount)));
-				}
+				int am = (Integer) amount.getSelectedItem();
+				List<Status> l = t.getUserListStatuses(listId, new Paging(1, am));
 				for (int i = l.size() - 1; i >= 0; i--)
 				{
 					tab.addStatus(l.get(i));
 				}
-				tab.lastStat = l.get(0);
+				tab.top = l.get(0);
+				tab.last = l.get(l.size()-1);
 				tab.listId = listId;
+				tab.amount = am;
 				tab.listName = listName;
 				tab.setNumber(tab.queue.size());
 				int time = (Integer) refreshInterval.getValue();

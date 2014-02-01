@@ -1,6 +1,8 @@
 package net.firstspring.javatter.listplugin;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.util.Collections;
@@ -11,6 +13,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -25,7 +28,7 @@ import com.orekyuu.javatter.util.TweetObjectFactory;
 import com.orekyuu.javatter.view.IJavatterTab;
 import com.orekyuu.javatter.viewobserver.UserEventViewObserver;
 
-public class ListTab implements IJavatterTab, AdjustmentListener
+public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 {
 
 	UserEventViewObserver observer;
@@ -37,24 +40,74 @@ public class ListTab implements IJavatterTab, AdjustmentListener
 	volatile Queue<JPanel> queue = new ConcurrentLinkedQueue<JPanel>();
 	boolean queueFlag;
 	boolean queueEvent;
-	JPanel last;
 
 	public static final Timer refresher = new Timer();
 	public RefreshTask refreshTask = new RefreshTask();
 	public int listId;
+	public int amount;
 	public String listName = "Loading";
-	public Status lastStat;
+	public Status top;
+	public Status last;
+	
+	public JButton load;
 
 	public ListTab(UserEventViewObserver observer, List<TweetObjectBuilder> builders)
 	{
 		this.observer = observer;
 		this.builders = builders;
 		table = new TimelineTable();
+		load = new JButton("more load");
+		load.addActionListener(this);
+		table.addLast(load);
 		table.setBackground(BackGroundColor.color);
 		tp = new ListTabScrollPane(this);
 		tp.setViewportView(this.table);
 		tp.getVerticalScrollBar().setUnitIncrement(20);
 		tp.getVerticalScrollBar().addAdjustmentListener(this);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		load.setEnabled(false);
+		load.setText("loading...");
+		new Thread()
+		{
+			public void run()
+			{
+				try
+				{
+					List<Status> l = TwitterManager.getInstance().getTwitter().getUserListStatuses(listId, new Paging(1, amount, 1, last.getId()));
+					l.remove(0);
+					if(!l.isEmpty())
+					{
+						last = l.get(l.size()-1);
+					}
+					final JPanel[] p = new JPanel[l.size()];
+					for (int i = 0; i < l.size(); i++) {
+						p[i] = createObject(l.get(i));
+					}
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							table.model.removeRow(table.model.getRowCount()-1);
+							for (JPanel panel : p) {
+								table.addLast(panel);
+							}
+							load.setEnabled(true);
+							load.setText("more load");
+							table.addLast(load);
+						}
+					});
+				}
+				catch(Exception ex)
+				{
+					load.setEnabled(true);
+					load.setText("more load");
+				}
+			}
+		}.start();
 	}
 
 	class RefreshTask extends TimerTask
@@ -65,8 +118,8 @@ public class ListTab implements IJavatterTab, AdjustmentListener
 		{
 			try
 			{
-				List<Status> l = TwitterManager.getInstance().getTwitter().getUserListStatuses(listId, new Paging(1, 200, lastStat.getId()));
-				lastStat = l.get(0);
+				List<Status> l = TwitterManager.getInstance().getTwitter().getUserListStatuses(listId, new Paging(1, 200, top.getId()));
+				top = l.get(0);
 				Collections.reverse(l);
 				for (Status s : l)
 				{
@@ -125,7 +178,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener
 		return tp;
 	}
 
-	private JPanel createObject(Status status)
+	public JPanel createObject(Status status)
 	{
 		TweetObjectFactory factory = new TweetObjectFactory(status, builders);
 		return (JPanel) factory.createTweetObject(this.observer).getComponent();
