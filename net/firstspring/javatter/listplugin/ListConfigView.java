@@ -6,10 +6,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -44,6 +47,24 @@ public class ListConfigView implements IJavatterTab, ActionListener
 	public ListConfigView(SaveData data)
 	{
 		this.data = data;
+
+	}
+
+	public void loadLists()
+	{
+		File data = new File(ListPlugin.instance.dir, "lists.dat");
+		try(ObjectInputStream is = new ObjectInputStream(new FileInputStream(data)))
+		{
+			lists = (List<UserList>)is.readObject();
+			String[] arr = new String[lists.size()];
+			for(int i = 0; i < arr.length; i++)
+			{
+				arr[i] = lists.get(i).getName();
+			}
+			listsView.setListData(arr);
+		} catch(Exception e)
+		{
+		}
 	}
 
 	@Override
@@ -87,17 +108,16 @@ public class ListConfigView implements IJavatterTab, ActionListener
 		{
 			public void mouseWheelMoved(MouseWheelEvent e)
 			{
-				JSpinner s = (JSpinner) e.getComponent();
+				JSpinner s = (JSpinner)e.getComponent();
 				Object value;
-				if (e.getWheelRotation() < 0)
+				if(e.getWheelRotation() < 0)
 				{
 					value = s.getNextValue();
-				}
-				else
+				} else
 				{
 					value = s.getPreviousValue();
 				}
-				if (value != null)
+				if(value != null)
 				{
 					s.setValue(value);
 				}
@@ -110,7 +130,7 @@ public class ListConfigView implements IJavatterTab, ActionListener
 		label.setLocation(5, 89);
 		panel.add(label);
 
-		amount = new JComboBox<Integer>(new Integer[] { 20, 50, 100, 200 });
+		amount = new JComboBox<Integer>(new Integer[] {20, 50, 100, 200});
 		amount.setSize(50, amount.getPreferredSize().height);
 		amount.setLocation(110, 85);
 		panel.add(amount);
@@ -120,12 +140,15 @@ public class ListConfigView implements IJavatterTab, ActionListener
 		label.setLocation(165, 89);
 		panel.add(label);
 
-		getCount = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5 });
+		getCount = new JComboBox<Integer>(new Integer[] {1, 2, 3, 4, 5});
 		getCount.setSize(50, getCount.getPreferredSize().height);
 		getCount.setLocation(177, 85);
 		panel.add(getCount);
 
 		tab.add("リストタブ設定", panel);
+
+		loadLists();
+
 		return tab;
 	}
 
@@ -136,23 +159,23 @@ public class ListConfigView implements IJavatterTab, ActionListener
 		{
 			Twitter t = TwitterManager.getInstance().getTwitter();
 			Object src = e.getSource();
-			if (src == getButton)
+			if(src == getButton)
 			{
-				lists = t.getUserLists(t.getId());
-				DefaultListModel model = new DefaultListModel();
-				for (int i = 0; i < lists.size(); i++)
+				File data = new File(ListPlugin.instance.dir, "lists.dat");
+				try(ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(data)))
 				{
-					model.addElement(lists.get(i).getName());
+					os.writeObject(t.getUserLists(t.getId()));
+				} catch(Exception ex)
+				{
 				}
-				listsView.setModel(model);
+				loadLists();
 			}
-			if (src == selectButton)
+			if(src == selectButton)
 			{
 				Thread loader = new Thread(new LocalRunnable());
 				loader.start();
 			}
-		}
-		catch (Exception ex)
+		} catch(Exception ex)
 		{
 
 		}
@@ -169,22 +192,21 @@ public class ListConfigView implements IJavatterTab, ActionListener
 				String listName = listsView.getSelectedValue();
 				ListTab tab = ListPlugin.instance.createTab();
 				int listId = lists.get(listsView.getSelectedIndex()).getId();
-				int am = (Integer) amount.getSelectedItem();
+				int am = (Integer)amount.getSelectedItem();
 				List<Status> l = t.getUserListStatuses(listId, new Paging(1, am));
-				for (int i = l.size() - 1; i >= 0; i--)
+				for(int i = l.size() - 1; i >= 0; i--)
 				{
 					tab.addStatus(l.get(i));
 				}
 				tab.top = l.get(0);
-				tab.last = l.get(l.size()-1);
+				tab.last = l.get(l.size() - 1);
 				tab.listId = listId;
 				tab.amount = am;
 				tab.listName = listName;
 				tab.setNumber(tab.queue.size());
-				int time = (Integer) refreshInterval.getValue();
+				int time = (Integer)refreshInterval.getValue();
 				ListTab.refresher.schedule(tab.refreshTask, time * 1000, time * 1000);
-			}
-			catch (Exception e)
+			} catch(Exception e)
 			{
 
 			}
