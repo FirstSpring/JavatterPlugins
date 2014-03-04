@@ -2,13 +2,15 @@ package net.firstspring.javatter.listplugin;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.util.EventObject;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.CellRendererPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.CellEditorListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -59,17 +61,32 @@ public class TimelineTable extends JTable implements MouseMotionListener
 		setModel(model);
 		setDefaultRenderer(Object.class, new TableCellRenderer()
 		{
+			Set<Object> resized = new HashSet<Object>();
+			int tableSize;
+			
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean select, boolean focus, int row, int column)
 			{
+				if(tableSize != table.getWidth())
+				{
+					resized.clear();
+					tableSize = table.getWidth();
+				}
 				Component c = (Component)value;
 				c.setMinimumSize(null);
 				c.setPreferredSize(null);
 				c.setMaximumSize(null);
+				if(!resized.contains(c))
+				{
+					SwingUtilities.updateComponentTreeUI(c);
+				}
 				int height = c.getPreferredSize().height;
 				// 呼び出しがループするのを防ぐ
 				if(table.getRowHeight(row) != height)
 				{
 					table.setRowHeight(row, c.getPreferredSize().height);
+				} else
+				{
+					resized.add(c);
 				}
 				return c;
 			}

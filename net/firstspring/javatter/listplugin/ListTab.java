@@ -48,7 +48,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 	public String listName = "Loading";
 	public Status top;
 	public Status last;
-	
+
 	public JButton load;
 
 	public ListTab(UserEventViewObserver observer, List<TweetObjectBuilder> builders)
@@ -65,7 +65,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 		tp.getVerticalScrollBar().setUnitIncrement(20);
 		tp.getVerticalScrollBar().addAdjustmentListener(this);
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
@@ -81,18 +81,20 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 					l.remove(0);
 					if(!l.isEmpty())
 					{
-						last = l.get(l.size()-1);
+						last = l.get(l.size() - 1);
 					}
 					final JPanel[] p = new JPanel[l.size()];
-					for (int i = 0; i < l.size(); i++) {
+					for(int i = 0; i < l.size(); i++)
+					{
 						p[i] = createObject(l.get(i));
 					}
 					SwingUtilities.invokeLater(new Runnable()
 					{
 						public void run()
 						{
-							table.model.removeRow(table.model.getRowCount()-1);
-							for (JPanel panel : p) {
+							table.model.removeRow(table.model.getRowCount() - 1);
+							for(JPanel panel : p)
+							{
 								table.addLast(panel);
 							}
 							load.setEnabled(true);
@@ -100,8 +102,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 							table.addLast(load);
 						}
 					});
-				}
-				catch(Exception ex)
+				} catch(Exception ex)
 				{
 					load.setEnabled(true);
 					load.setText("more load");
@@ -121,12 +122,11 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 				List<Status> l = TwitterManager.getInstance().getTwitter().getUserListStatuses(listId, new Paging(1, 200, top.getId()));
 				top = l.get(0);
 				Collections.reverse(l);
-				for (Status s : l)
+				for(Status s : l)
 				{
 					addStatus(s);
 				}
-			}
-			catch (Exception e)
+			} catch(Exception e)
 			{
 
 			}
@@ -136,7 +136,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 	public void addStatus(Status stat)
 	{
 		final JPanel p = createObject(stat);
-		if (tp.getVerticalScrollBar().getValue() == 0 && !queueFlag)
+		if(tp.getVerticalScrollBar().getValue() == 0 && !queueFlag)
 		{
 			SwingUtilities.invokeLater(new Runnable()
 			{
@@ -145,8 +145,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 					table.addTop(p);
 				}
 			});
-		}
-		else
+		} else
 		{
 			queue.add(p);
 			setNumber(queue.size());
@@ -155,16 +154,15 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 
 	public synchronized void setNumber(int num)
 	{
-		JTabbedPane tab = (JTabbedPane) tp.getParent();
-		for (int i = 0; i < tab.getTabCount(); i++)
+		JTabbedPane tab = (JTabbedPane)tp.getParent();
+		for(int i = 0; i < tab.getTabCount(); i++)
 		{
-			if (tab.getComponentAt(i) == this.tp)
+			if(tab.getComponentAt(i) == this.tp)
 			{
-				if (num != 0)
+				if(num != 0)
 				{
 					tab.setTitleAt(i, listName + "(" + num + ")");
-				}
-				else
+				} else
 				{
 					tab.setTitleAt(i, listName);
 				}
@@ -181,15 +179,15 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 	public JPanel createObject(Status status)
 	{
 		TweetObjectFactory factory = new TweetObjectFactory(status, builders);
-		return (JPanel) factory.createTweetObject(this.observer).getComponent();
+		return (JPanel)factory.createTweetObject(this.observer).getComponent();
 	}
 
 	@Override
 	public void adjustmentValueChanged(AdjustmentEvent arg0)
 	{
-		if (arg0.getValue() == 0)
+		if(arg0.getValue() == 0)
 		{
-			if (queueEvent)
+			if(queueEvent)
 			{
 				return;
 			}
@@ -201,7 +199,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 				{
 					queueFlag = true;
 					final Queue<JPanel> q = new LinkedList<JPanel>();
-					while (!queue.isEmpty())
+					while(!queue.isEmpty())
 					{
 						q.add(queue.poll());
 					}
@@ -209,18 +207,22 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 					{
 						public void run()
 						{
-							int c = q.size();
-							int height = 0;
-							while (!q.isEmpty())
+							final int c = q.size();
+							while(!q.isEmpty())
 							{
 								table.addTop(q.poll());
 							}
-							for (int i = 0; i < c; i++)
+							for(int i = 0; i < c; i++)
 							{
 								table.prepareRenderer(ListTab.this.table.getCellRenderer(i, 0), i, 0);
-								height += table.getRowHeight(i);
 							}
-							tp.getVerticalScrollBar().setValue(height);
+							SwingUtilities.invokeLater(new Runnable()
+							{
+								public void run()
+								{
+									tp.getVerticalScrollBar().setValue(table.getCellRect(c, 0, true).y);
+								}
+							});
 							setNumber(0);
 							queueFlag = false;
 						}
@@ -228,8 +230,7 @@ public class ListTab implements IJavatterTab, AdjustmentListener, ActionListener
 				}
 			};
 			th.start();
-		}
-		else
+		} else
 		{
 			queueEvent = false;
 		}
